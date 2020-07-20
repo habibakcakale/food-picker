@@ -1,0 +1,79 @@
+<form [formGroup]="newOrder" novalidate (ngSubmit)="onSubmit()">
+  <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>Yemek Secimi</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="full-width">
+            <input matInput placeholder="Isim soyisim" formControlName="fullName">
+            <mat-error *ngIf="newOrder.controls['fullName'].hasError('required')">
+              Isim soyisim alani <strong>zorunlu</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="full-width">
+            <mat-select placeholder="Ana yemek" formControlName="mains">
+              <mat-option *ngFor="let main of dataSource.mains" [value]="main">
+                {{ main }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="newOrder.controls['mains'].hasError('required')">
+              Ana yemek <strong>zorunlu</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="full-width">
+            <mat-select placeholder="Yardimci yemek" formControlName="sideOrders">
+              <mat-option *ngFor="let sideOrder of dataSource.sideOrders" [value]="sideOrder">
+                {{ sideOrder }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="newOrder.controls['sideOrders'].hasError('required')">
+              Yardimci yemek <strong>zorunlu</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="full-width">
+            <mat-select placeholder="Salata" formControlName="salad">
+              <mat-option *ngFor="let salad of dataSource.salad" [value]="salad">
+                {{ salad }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="newOrder.controls['salad'].hasError('required')">
+              Salata secimi <strong>zorunlu</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="full-width">
+            <mat-select placeholder="Corba" formControlName="soup">
+              <mat-option *ngFor="let soup of dataSource.soup" [value]="soup">
+                {{ soup }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="newOrder.controls['soup'].hasError('required')">
+              Corba secimi <strong>zorunlu</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="right">
+      <a mat-raised-button color="basic" (click)="closeDialog()">Iptal</a>
+      <button mat-raised-button color="primary" type="submit">Gonder</button>
+    </mat-card-actions>
+  </mat-card>
+</form>
