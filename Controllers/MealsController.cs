@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FoodApp.Data;
 using FoodApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -11,7 +12,8 @@ namespace FoodApp.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FoodsController : ControllerBase
+    [Authorize]
+    public class MealsController : ControllerBase
     {
         private readonly FoodDbContext dbContext;
 
@@ -21,7 +23,7 @@ namespace FoodApp.Controllers
                 {NamingStrategy = new CamelCaseNamingStrategy()}
         };
 
-        public FoodsController(FoodDbContext dbContext)
+        public MealsController(FoodDbContext dbContext)
         {
             this.dbContext = dbContext;
         }
@@ -29,23 +31,23 @@ namespace FoodApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var items = await dbContext.FoodItems.ToListAsync();
+            var items = await dbContext.Meals.ToListAsync();
             return Ok(items);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = dbContext.FoodItems.Attach(new FoodItem() {Id = id});
+            var item = dbContext.Meals.Attach(new Meal() {Id = id});
             item.State = EntityState.Deleted;
             await dbContext.SaveChangesAsync();
             return Ok(item.Entity);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(FoodItem[] foodItems)
+        public async Task<IActionResult> Post(Meal[] foodItems)
         {
-            dbContext.FoodItems.AddRange(foodItems);
+            dbContext.Meals.AddRange(foodItems);
             await dbContext.SaveChangesAsync();
             return Ok(foodItems);
         }

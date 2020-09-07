@@ -4,19 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTable, MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
-
-export enum FoodType {
-  mains = "Ana Yemek",
-  sideOrders = "Ara Yemek",
-  salad = "Salata",
-  soup = "Corba"
-}
-
-export interface FoodItem {
-  id: number,
-  name: string;
-  type: FoodType;
-}
+import {Meal, MealType} from "../../models/order";
 
 @Component({
   selector: 'app-list-page',
@@ -26,14 +14,13 @@ export interface FoodItem {
 export class ListPageComponent implements AfterViewInit, OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable) table: MatTable<FoodItem>;
-  dataSource: MatTableDataSource<FoodItem>;
+  @ViewChild(MatTable) table: MatTable<Meal>;
+  dataSource: MatTableDataSource<Meal>;
 
   foodTypes = [
-    FoodType.mains,
-    FoodType.sideOrders,
-    FoodType.salad,
-    FoodType.soup
+    {label: "Ana Yemek", value: MealType.Mains},
+    {label: "Ara Yemek", value: MealType.SideOrders},
+    {label: "Salata", value: MealType.Salad}
   ]
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
@@ -43,7 +30,7 @@ export class ListPageComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit() {
-    const items: FoodItem[] = this.activatedRoute.snapshot.data.foodItems || [];
+    const items: Meal[] = this.activatedRoute.snapshot.data.foodItems || [];
     this.dataSource = new MatTableDataSource(items);
   }
 
@@ -54,20 +41,20 @@ export class ListPageComponent implements AfterViewInit, OnInit {
   }
 
   addNewFood() {
-    this.dataSource.data.push({id: 0, name: '', type: FoodType.mains});
+    this.dataSource.data.push({id: 0, name: '', mealType: MealType.Mains});
     this.dataSource.filter = '';
   }
 
   saveFoods() {
     const newItems = this.dataSource.data.filter(i => !i.id)
-    this.client.post<FoodItem[]>('/foods', newItems).toPromise().then(res => {
+    this.client.post<Meal[]>('/meals', newItems).toPromise().then(res => {
       res.forEach((item, index) => newItems[index].id = item.id);
     })
   }
 
-  removeFood(row: FoodItem) {
+  removeFood(row: Meal) {
     if (row.id)
-      this.client.delete(`/foods/${row.id}`).toPromise().finally(console.log);
+      this.client.delete(`/meals/${row.id}`).toPromise().finally(console.log);
     const index = this.dataSource.data.indexOf(row);
     this.dataSource.data.splice(index, 1);
     this.dataSource.filter = '';

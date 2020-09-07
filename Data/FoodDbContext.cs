@@ -9,14 +9,17 @@ namespace FoodApp.Data
         {
         }
 
-        public DbSet<FoodItem> FoodItems { get; set; }
-        public DbSet<TodaySelection> Selections { get; set; }
+        public DbSet<Meal> Meals { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<FoodItem>().Property(item => item.Id).ValueGeneratedOnAdd();
-            modelBuilder.Entity<TodaySelection>().Property(item => item.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Meal>().ToTable(nameof(Meal)).HasKey(prop => prop.Id);
+            modelBuilder.Entity<Order>().ToTable(nameof(Order)).HasKey(item => item.Id);
+            modelBuilder.Entity<Order>().HasMany(order => order.OrderItems).WithOne();
+            modelBuilder.Entity<OrderItem>().ToTable(nameof(OrderItem)).Property(item => item.Id).ValueGeneratedOnAdd();
         }
     }
 }

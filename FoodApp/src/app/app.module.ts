@@ -1,5 +1,5 @@
 import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -16,6 +16,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatListModule} from '@angular/material/list';
 import {CommonModule} from "@angular/common";
 import {HttpClientModule} from "@angular/common/http";
+import {UserService} from "./services/user.service";
 
 @NgModule({
   declarations: [
@@ -38,8 +39,13 @@ import {HttpClientModule} from "@angular/common/http";
     MatSidenavModule,
     MatListModule
   ],
-  providers: [],
+  providers: [{provide: APP_INITIALIZER, useFactory: userInit, deps: [UserService], multi: true}],
   bootstrap: [AppComponent]
 })
 export class AppModule {
+}
+
+
+export function userInit(userService: UserService) {
+  return () => userService.init();
 }

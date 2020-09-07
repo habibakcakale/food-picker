@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from "@angular/router";
 import {ListPageComponent} from "./list-page.component";
-import {TodaySelectionComponent} from './today-selection.component';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
@@ -15,29 +14,30 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatCardModule} from '@angular/material/card';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatDialogModule} from "@angular/material/dialog";
-import {FoodItemsResolver} from "./food-items.resolver";
 import {HttpClientModule} from "@angular/common/http";
-import {TodaySelectionsResolver} from "./today-selections.resolver";
+import {OrdersComponent} from "./orders.component";
+import {MealItemsResolver} from "./resolvers/meal-items.resolver";
+import {OrdersResolver} from "./resolvers/orders-resolver.service";
 
 
 @NgModule({
-  declarations: [ListPageComponent, TodaySelectionComponent, NewOrderComponent],
+  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
     RouterModule.forChild([
-      {path: "", pathMatch: "full", redirectTo: "list"},
+      {path: "", pathMatch: "full", redirectTo: "today"},
       {
         path: "list", component: ListPageComponent, resolve: {
-          foodItems: FoodItemsResolver
+          foodItems: MealItemsResolver
         }
       },
       {
-        path: "today", component: TodaySelectionComponent, resolve: {
-          foodItems: FoodItemsResolver,
-          todaySelections: TodaySelectionsResolver
+        path: "today", component: OrdersComponent, resolve: {
+          foodItems: MealItemsResolver,
+          orders: OrdersResolver
         }
       }
     ]),
@@ -53,5 +53,5 @@ import {TodaySelectionsResolver} from "./today-selections.resolver";
     MatDialogModule
   ]
 })
-export class FoodListModule {
+export class OrderModule {
 }

@@ -6,12 +6,12 @@ import {CommonModule} from "@angular/common";
 
 const routes: Routes = [
   {
-    path: "", pathMatch: "full", redirectTo: "food"
+    path: "", pathMatch: "full", redirectTo: "today"
   },
   {
-    path: "food",
+    path: "",
     component: NavigationComponent,
-    loadChildren: () => import("./../pages/food/food.module").then(m => m.FoodListModule)
+    loadChildren: () => import("./pages/order/order.module").then(m => m.OrderModule)
   }
 ];
 
