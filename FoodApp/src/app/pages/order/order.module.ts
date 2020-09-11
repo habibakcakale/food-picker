@@ -18,10 +18,13 @@ import {HttpClientModule} from "@angular/common/http";
 import {OrdersComponent} from "./orders.component";
 import {MealItemsResolver} from "./resolvers/meal-items.resolver";
 import {OrdersResolver} from "./resolvers/orders-resolver.service";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatNativeDateModule} from "@angular/material/core";
+import {OrderDatePickerComponent} from './order-date-picker.component';
 
 
 @NgModule({
-  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent],
+  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent, OrderDatePickerComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -35,10 +38,18 @@ import {OrdersResolver} from "./resolvers/orders-resolver.service";
         }
       },
       {
-        path: "today", component: OrdersComponent, resolve: {
-          foodItems: MealItemsResolver,
-          orders: OrdersResolver
-        }
+        path: "today", children: [{
+          path: '',
+          component: OrdersComponent, resolve: {
+            foodItems: MealItemsResolver,
+            orders: OrdersResolver
+          }
+        },
+          {
+            path: '',
+            component: OrderDatePickerComponent,
+            outlet: 'toolbar'
+          }],
       }
     ]),
     MatTableModule,
@@ -50,7 +61,9 @@ import {OrdersResolver} from "./resolvers/orders-resolver.service";
     MatSelectModule,
     MatRadioModule,
     MatCardModule,
-    MatDialogModule
+    MatDialogModule,
+    MatNativeDateModule,
+    MatDatepickerModule
   ]
 })
 export class OrderModule {

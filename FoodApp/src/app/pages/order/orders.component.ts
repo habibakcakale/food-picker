@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTable, MatTableDataSource} from '@angular/material/table';
@@ -11,24 +11,38 @@ import {TodaySelection} from "../../models/today-selection";
 import {mapOrderItem} from "./utilities";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/user";
+import {OrderDateService} from "./order-date.service";
+import {map} from "rxjs/operators";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-today-selection',
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.scss']
 })
-export class OrdersComponent implements AfterViewInit, OnInit {
+export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatTable) table: MatTable<TodaySelection>;
   dataSource: MatTableDataSource<TodaySelection>;
-
   displayedColumns = ['fullName', 'mains', 'sideOrders', 'salad', 'actions'];
   private foodGroups: { [type: string]: Meal[] };
   private user: User;
+  private $dateSub: Subscription;
 
-  constructor(private elementRef: ElementRef<HTMLElement>, public dialog: MatDialog, private activatedRoute: ActivatedRoute, private httpClient: HttpClient, userService: UserService) {
+  constructor(private elementRef: ElementRef<HTMLElement>,
+              public dialog: MatDialog,
+              private activatedRoute: ActivatedRoute,
+              private httpClient: HttpClient,
+              dateService: OrderDateService,
+              userService: UserService) {
     this.user = userService.user;
+    this.$dateSub = dateService.subscribe((date: Date) => {
+      this.httpClient.get<Order[]>(`orders?dateTime=${date.toISOString()}`, {observe: "body"}).pipe(map(orders => orders.map<TodaySelection>(mapOrderItem))).subscribe(orders => {
+        this.dataSource.data = orders;
+        this.dataSource.filter = '';
+      });
+    })
   }
 
   ngOnInit() {
@@ -102,5 +116,9 @@ export class OrdersComponent implements AfterViewInit, OnInit {
     const newTab = open("about:blank");
     newTab.document.body.innerHTML = table;
     newTab.print();
+  }
+
+  ngOnDestroy(): void {
+    this.$dateSub.unsubscribe();
   }
 }

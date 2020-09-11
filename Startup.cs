@@ -1,6 +1,7 @@
 using FoodApp.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,11 @@ namespace FoodApp
             services.AddMemoryCache();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseSqlite("Data Source=food.db"));
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "FoodApp/dist"; });
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie().AddGoogle(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            }).AddCookie().AddGoogle(options =>
             {
                 options.ClientId = "";
                 options.ClientSecret = "";
@@ -66,7 +71,7 @@ namespace FoodApp
             app.Use(async (context, next) =>
             {
                 if (!context.User.Identity.IsAuthenticated)
-                    await context.ChallengeAsync("Google");
+                    await context.ChallengeAsync();
                 else
                     await next();
             });

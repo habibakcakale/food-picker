@@ -19,7 +19,7 @@ namespace FoodApp.Data
             modelBuilder.Entity<Meal>().ToTable(nameof(Meal)).HasKey(prop => prop.Id);
             modelBuilder.Entity<Order>().ToTable(nameof(Order)).HasKey(item => item.Id);
             modelBuilder.Entity<Order>().HasMany(order => order.OrderItems).WithOne();
-            modelBuilder.Entity<OrderItem>().ToTable(nameof(OrderItem)).Property(item => item.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<OrderItem>().ToTable(nameof(OrderItem)).HasKey(item => item.Id);
         }
     }
 }

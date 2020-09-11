@@ -12,7 +12,6 @@ namespace FoodApp.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
     public class MealsController : ControllerBase
     {
         private readonly FoodDbContext dbContext;

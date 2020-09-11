@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using FoodApp.Data;
 using FoodApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +36,11 @@ namespace FoodApp.Controllers
                 FullName = User.Identity.Name,
                 UserId = userId,
                 Date = date,
-                OrderItems = orderItems
+                OrderItems = orderItems.Select(item =>
+                {
+                    item.Id = 0;
+                    return item;
+                }).ToList()
             };
             dbContext.Orders.Add(order);
             await dbContext.SaveChangesAsync();
@@ -43,9 +48,9 @@ namespace FoodApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(DateTime? dateTime)
         {
-            var date = GetTurkeyDate();
+            var date = dateTime ?? GetTurkeyDate();
             var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date).ToListAsync();
             return Ok(items);
         }
