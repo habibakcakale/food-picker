@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace FoodApp.Controllers
 {
     using System.Security.Claims;
@@ -11,14 +13,12 @@ namespace FoodApp.Controllers
     {
         public IActionResult Login()
         {
-            var redirectUrl = Url.ActionLink();
-            return new ChallengeResult("Google", new AuthenticationProperties())
-            {
-                Properties = new GoogleChallengeProperties
+            if (!User.Identity.IsAuthenticated)
+                return new ChallengeResult(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()
                 {
-                    RedirectUri = redirectUrl
-                }
-            };
+                    RedirectUri = Url.ActionLink()
+                });
+            return Redirect("/");
         }
 
         [Authorize]
@@ -43,16 +43,9 @@ namespace FoodApp.Controllers
                         break;
                 }
             }
-
             return Ok(userInfo);
         }
-
-        public IActionResult GoogleResponse()
-        {
-            return Ok(Request.GetEncodedPathAndQuery());
-        }
     }
-
     public class UserInfo
     {
         public string Name { get; set; }

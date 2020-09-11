@@ -12,6 +12,7 @@ namespace FoodApp.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly FoodDbContext dbContext;
@@ -67,10 +68,6 @@ namespace FoodApp.Controllers
         private static DateTime GetTurkeyDate()
         {
             return DateTime.UtcNow.AddHours(3).Date;
-            var info = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
-            var localServerTime = DateTimeOffset.Now;
-            var localTime = TimeZoneInfo.ConvertTime(localServerTime, info);
-            return localTime.Date;
         }
     }
 

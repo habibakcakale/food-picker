@@ -17,8 +17,14 @@ export class UserService {
   }
 
   init() {
-    return this.client.get<User>("account/userinfo").toPromise().then((resp) => {
-      this._user = resp
+    return new Promise((resolve, reject) => {
+      this.client.get<User>("account/userinfo").toPromise().then((resp) => {
+        this._user = resp
+        resolve();
+      }).catch(() => {
+        reject();
+        location.replace("/account/login")
+      })
     })
   }
 }
