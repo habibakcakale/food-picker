@@ -17,6 +17,8 @@ import {MatListModule} from '@angular/material/list';
 import {CommonModule} from "@angular/common";
 import {HttpClientModule} from "@angular/common/http";
 import {UserService} from "./services/user.service";
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,8 @@ import {UserService} from "./services/user.service";
     LayoutModule,
     MatToolbarModule,
     MatSidenavModule,
-    MatListModule
+    MatListModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [{provide: APP_INITIALIZER, useFactory: userInit, deps: [UserService], multi: true}],
   bootstrap: [AppComponent]
