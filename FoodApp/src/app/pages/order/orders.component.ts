@@ -99,8 +99,10 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   print() {
-    const rows = this.dataSource.data.map(item => `<row><td>${item.fullName}</td><td>${item.mains}</td><td>${item.sideOrders}</td><td>${item.salad}</td></row>`)
-    const table = `<table border="1">
+    const rows = this.dataSource.data.map(item => `<row><td style="font-weight: 700;">${item.fullName}</td><td>${item.mains}</td><td>${item.sideOrders}</td><td>${item.salad}</td></row>`)
+    const table = `
+<link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css">
+<table class="table table-stripped">
 <thead>
     <row>
         <th>Isim</th>
