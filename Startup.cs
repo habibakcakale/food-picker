@@ -27,14 +27,11 @@ namespace FoodApp
             services.AddMemoryCache();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseSqlite("Data Source=food.db"));
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "FoodApp/dist"; });
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            }).AddCookie().AddGoogle(options =>
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie().AddGoogle(options =>
             {
                 options.ClientId = "";
                 options.ClientSecret = "";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
         }
 
@@ -67,13 +64,6 @@ namespace FoodApp
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
-            });
-            app.Use(async (context, next) =>
-            {
-                if (!context.User.Identity.IsAuthenticated)
-                    await context.ChallengeAsync();
-                else
-                    await next();
             });
             app.UseSpa(spa =>
             {
