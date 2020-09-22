@@ -14,6 +14,7 @@ import {User} from "../../models/user";
 import {OrderDateService} from "./order-date.service";
 import {map} from "rxjs/operators";
 import {Subscription} from "rxjs";
+import {ConfirmDialogComponent} from "./confirm-dialog.component";
 
 @Component({
     selector: 'app-today-selection',
@@ -72,7 +73,8 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
                 salad: this.foodGroups[MealType.Salad],
             }
         });
-        dialogRef.afterClosed().subscribe(result => {
+        const subscriber = dialogRef.afterClosed().subscribe(result => {
+            subscriber.unsubscribe();
             if (result) {
                 const orderItems = Object.keys(result).map(key => result[key]).reduce((prev, curr) => prev.concat(curr), []);
                 this.httpClient.post<Order>("orders", orderItems).toPromise().then(res => {
@@ -97,11 +99,19 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     removeOrder(row: Order) {
-        if (row.id)
-            this.httpClient.delete<Order>(`orders/${row.id}`).toPromise().finally(console.log)
-        const index = this.dataSource.data.indexOf(row);
-        this.dataSource.data.splice(index, 1);
-        this.dataSource.filter = '';
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {fullName: row.fullName}
+        });
+        const subscriber = dialogRef.afterClosed().subscribe(result => {
+            subscriber.unsubscribe();
+            if (result) {
+                if (row.id)
+                    this.httpClient.delete<Order>(`orders/${row.id}`).toPromise().finally(console.log)
+                const index = this.dataSource.data.indexOf(row);
+                this.dataSource.data.splice(index, 1);
+                this.dataSource.filter = '';
+            }
+        })
     }
 
     print() {

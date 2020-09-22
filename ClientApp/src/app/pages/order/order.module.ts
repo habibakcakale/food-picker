@@ -23,10 +23,11 @@ import {MatNativeDateModule} from "@angular/material/core";
 import {OrderDatePickerComponent} from './order-date-picker.component';
 import {MatGridListModule} from "@angular/material/grid-list";
 import {MatListModule} from "@angular/material/list";
+import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 
 @NgModule({
-  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent, OrderDatePickerComponent],
+  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent, OrderDatePickerComponent, ConfirmDialogComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

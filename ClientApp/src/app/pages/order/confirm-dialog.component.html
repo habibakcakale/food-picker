@@ -1,0 +1,9 @@
+<h1 mat-dialog-title>Dikkat!</h1>
+<div mat-dialog-content>
+    <div> {{fullName}} icin,</div>
+    Yemek siparişini silmek istediğinizden emin misiniz ?
+</div>
+<div mat-dialog-actions>
+    <a mat-raised-button color="basic" (click)="closeDialog()">Iptal</a>
+    <button mat-raised-button color="primary" type="submit" (click)="delete()">Sil</button>
+</div>
