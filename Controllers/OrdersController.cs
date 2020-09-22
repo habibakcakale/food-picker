@@ -36,7 +36,7 @@ namespace Meal.Controllers
                 FullName = User.Identity.Name,
                 UserId = userId,
                 Date = date,
-                OrderItems = orderItems.Select(item =>
+                OrderItems = orderItems.Where(item => item != null).Select(item =>
                 {
                     item.Id = 0;
                     return item;
