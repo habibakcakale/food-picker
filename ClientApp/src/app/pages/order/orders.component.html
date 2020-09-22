@@ -32,7 +32,7 @@
         </a>
       </th>
       <td mat-cell class="delete-col" *matCellDef="let row" style="text-align: right">
-        <a mat-icon-button color="warn" (click)="removeOrder(row)">
+        <a mat-icon-button color="warn" (click)="removeOrder(row)" *ngIf="user.id == row.userId">
           <mat-icon>delete</mat-icon>
         </a>
       </td>

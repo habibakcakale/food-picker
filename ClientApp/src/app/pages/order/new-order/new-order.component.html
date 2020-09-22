@@ -1,68 +1,69 @@
 <form [formGroup]="newOrder" novalidate (ngSubmit)="onSubmit()">
-  <mat-card class="shipping-card">
-    <mat-card-header>
-      <mat-card-title>Yemek Secimi</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <input matInput placeholder="Isim soyisim" readonly="readonly" [value]="user.name"/>
-          </mat-form-field>
+    <h1 mat-dialog-title>Yemek Secimi</h1>
+    <div mat-dialog-content>
+        <div class="row">
+            <div class="col">
+                <mat-form-field class="full-width">
+                    <input matInput placeholder="Isim soyisim" readonly="readonly" [value]="user.name"/>
+                </mat-form-field>
+            </div>
         </div>
-      </div>
-      <div class="row" *ngFor="let mains of getControls('mains'); let last=last">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <mat-select placeholder="Ana yemek" [formControl]="mains">
-              <mat-option *ngFor="let main of dataSource.mains" [value]="main">
-                {{ main.name }}
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix color="accent" (click)="addControl($event, 'mains')" *ngIf="last">add</mat-icon>
-            <mat-icon matSuffix color="warn" (click)="removeControl($event, 'mains', mains)">remove</mat-icon>
-            <mat-error *ngIf="hasError(mains,'required')">
-              Ana yemek <strong>zorunlu</strong>
-            </mat-error>
-          </mat-form-field>
+        <div class="row" *ngFor="let mains of getControls('mains'); let last=last">
+            <div class="col">
+                <mat-form-field class="full-width">
+                    <mat-select placeholder="Ana yemek" [formControl]="mains">
+                        <mat-option *ngFor="let main of dataSource.mains" [value]="main">
+                            {{ main.name }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix color="accent" (click)="addControl($event, 'mains')" *ngIf="last">add</mat-icon>
+                    <mat-icon matSuffix color="warn" (click)="removeControl($event, 'mains', mains)">remove</mat-icon>
+                    <mat-error *ngIf="hasError(mains,'required')">
+                        Ana yemek <strong>zorunlu</strong>
+                    </mat-error>
+                </mat-form-field>
+            </div>
         </div>
-      </div>
-      <div class="row" *ngFor="let sideOrderControl of getControls('sideOrders'); let last=last">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <mat-select placeholder="Yardimci yemek" [formControl]="sideOrderControl">
-              <mat-option *ngFor="let sideOrder of dataSource.sideOrders" [value]="sideOrder">
-                {{ sideOrder.name }}
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix color="accent" (click)="addControl($event, 'sideOrders')" *ngIf="last">add</mat-icon>
-            <mat-icon matSuffix color="warn" (click)="removeControl($event, 'sideOrders', sideOrderControl)">remove</mat-icon>
-            <mat-error *ngIf="hasError(sideOrderControl,'required')">
-              Yardimci yemek <strong>zorunlu</strong>
-            </mat-error>
-          </mat-form-field>
+        <div class="row" *ngFor="let sideOrderControl of getControls('sideOrders'); let last=last">
+            <div class="col">
+                <mat-form-field class="full-width">
+                    <mat-select placeholder="Yardimci yemek" [formControl]="sideOrderControl">
+                        <mat-option *ngFor="let sideOrder of dataSource.sideOrders" [value]="sideOrder">
+                            {{ sideOrder.name }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix color="accent" (click)="addControl($event, 'sideOrders')" *ngIf="last">add
+                    </mat-icon>
+                    <mat-icon matSuffix color="warn" (click)="removeControl($event, 'sideOrders', sideOrderControl)">
+                        remove
+                    </mat-icon>
+                    <mat-error *ngIf="hasError(sideOrderControl,'required')">
+                        Yardimci yemek <strong>zorunlu</strong>
+                    </mat-error>
+                </mat-form-field>
+            </div>
         </div>
-      </div>
-      <div class="row" *ngFor="let saladControl of getControls('salads'); let last=last">
-        <div class="col">
-          <mat-form-field class="full-width">
-            <mat-select placeholder="Salata" [formControl]="saladControl">
-              <mat-option *ngFor="let salad of dataSource.salad" [value]="salad">
-                {{ salad.name }}
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix color="accent" (click)="addControl($event, 'salads')" *ngIf="last">add</mat-icon>
-            <mat-icon matSuffix color="warn" (click)="removeControl($event, 'salads', saladControl)">remove</mat-icon>
-            <mat-error *ngIf="hasError(saladControl,'required')">
-              Salata secimi <strong>zorunlu</strong>
-            </mat-error>
-          </mat-form-field>
+        <div class="row" *ngFor="let saladControl of getControls('salads'); let last=last">
+            <div class="col">
+                <mat-form-field class="full-width">
+                    <mat-select placeholder="Salata" [formControl]="saladControl">
+                        <mat-option *ngFor="let salad of dataSource.salad" [value]="salad">
+                            {{ salad.name }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix color="accent" (click)="addControl($event, 'salads')" *ngIf="last">add
+                    </mat-icon>
+                    <mat-icon matSuffix color="warn" (click)="removeControl($event, 'salads', saladControl)">remove
+                    </mat-icon>
+                    <mat-error *ngIf="hasError(saladControl,'required')">
+                        Salata secimi <strong>zorunlu</strong>
+                    </mat-error>
+                </mat-form-field>
+            </div>
         </div>
-      </div>
-    </mat-card-content>
-    <mat-card-actions align="right">
-      <a mat-raised-button color="basic" (click)="closeDialog()">Iptal</a>
-      <button mat-raised-button color="primary" type="submit">Gonder</button>
-    </mat-card-actions>
-  </mat-card>
+    </div>
+    <div mat-dialog-actions>
+        <a mat-raised-button color="basic" (click)="closeDialog()">Iptal</a>
+        <button mat-raised-button color="primary" type="submit">Gonder</button>
+    </div>
 </form>
