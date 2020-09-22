@@ -128,7 +128,7 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     </tr>
   </thead>
   <tbody>
-  ${rows.join()}
+  ${rows.join("")}
   </tbody>
   </table>`;
         const newTab = open("about:blank");
