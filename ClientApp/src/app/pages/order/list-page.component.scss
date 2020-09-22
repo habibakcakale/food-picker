@@ -1,0 +1,19 @@
+.full-width-table {
+  width: 100%;
+}
+.new-item-fab {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  z-index: 100;
+}
+
+.save-item-fab {
+  position: fixed;
+  bottom: 75px;
+  right: 15px;
+  z-index: 100;
+}
+.mat-grid-tile .mat-figure {
+  justify-content: center !important;
+}

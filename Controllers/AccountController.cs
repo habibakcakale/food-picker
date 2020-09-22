@@ -1,27 +1,28 @@
-using System.Collections.Generic;
+using System.Security.Claims;
+using Meal.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace FoodApp.Controllers
+namespace Meal.Controllers
 {
-    using System.Security.Claims;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Google;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http.Extensions;
-    using Microsoft.AspNetCore.Mvc;
-
-    public class AccountController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class AccountController : ControllerBase
     {
+        [HttpGet("login")]
         public IActionResult Login()
         {
             if (!User.Identity.IsAuthenticated)
-                return new ChallengeResult(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()
+                return new ChallengeResult(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
                 {
                     RedirectUri = Url.ActionLink()
                 });
             return Redirect("/");
         }
 
-        [Authorize]
+        [Authorize, HttpGet]
         public IActionResult UserInfo()
         {
             var userInfo = new UserInfo {Name = User.Identity.Name ?? string.Empty};
@@ -43,15 +44,13 @@ namespace FoodApp.Controllers
                         break;
                 }
             }
+
             return Ok(userInfo);
         }
     }
-    public class UserInfo
+
+    public static class IdentityExtensions
     {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Id { get; set; }
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
+        public static string GetId(this ClaimsPrincipal identity) => identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 }

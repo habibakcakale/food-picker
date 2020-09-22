@@ -1,4 +1,4 @@
-namespace FoodApp.Models
+namespace Meal.Models
 {
     public enum MealType
     {

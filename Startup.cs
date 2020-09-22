@@ -1,15 +1,16 @@
-using FoodApp.Data;
-using Microsoft.AspNetCore.Authentication;
+using System.Text.Json;
+using Meal.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace FoodApp
+namespace Meal
 {
     public class Startup
     {
@@ -23,60 +24,38 @@ namespace FoodApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
             services.AddMemoryCache();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseSqlite("Data Source=food.db"));
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "FoodApp/dist"; });
+            services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie().AddGoogle(options =>
             {
                 options.ClientId = "";
                 options.ClientSecret = "";
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
+            services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto});
+            app.UseAuthentication();
+            var provider = new FileExtensionContentTypeProvider {Mappings = {[".webmanifest"] = "application/manifest+json"}};
+            app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = provider});
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSpa(spa => spa.UseProxyToSpaDevelopmentServer("http://localhost:4200"));
             }
             else
             {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseSpaStaticFiles(new StaticFileOptions {ContentTypeProvider = provider});
+                app.UseSpa(spa => spa.Options.SourcePath = "ClientApp");
             }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            if (!env.IsDevelopment())
-            {
-                app.UseSpaStaticFiles();
-            }
-
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
-            });
-            app.UseSpa(spa =>
-            {
-                // To learn more about options for serving an Angular SPA from ASP.NET Core,
-                // see https://go.microsoft.com/fwlink/?linkid=864501
-
-                spa.Options.SourcePath = "FoodApp";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
-                }
-            });
         }
     }
 }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FoodApp.Models
+namespace Meal.Models
 {
     public class OrderItem
     {

@@ -1,7 +1,7 @@
-namespace FoodApp.Models
-{
-    using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
+namespace Meal.Models
+{
     public class Meal
     {
         [Key] public int Id { get; set; }

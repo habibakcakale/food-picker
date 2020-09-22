@@ -1,7 +1,7 @@
-using FoodApp.Models;
+using Meal.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodApp.Data
+namespace Meal.Data
 {
     public class FoodDbContext : DbContext
     {
@@ -9,14 +9,14 @@ namespace FoodApp.Data
         {
         }
 
-        public DbSet<Meal> Meals { get; set; }
+        public DbSet<Models.Meal> Meals { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Meal>().ToTable(nameof(Meal)).HasKey(prop => prop.Id);
+            modelBuilder.Entity<Models.Meal>().ToTable(nameof(Meal)).HasKey(prop => prop.Id);
             modelBuilder.Entity<Order>().ToTable(nameof(Order)).HasKey(item => item.Id);
             modelBuilder.Entity<Order>().HasMany(order => order.OrderItems).WithOne();
             modelBuilder.Entity<OrderItem>().ToTable(nameof(OrderItem)).HasKey(item => item.Id);

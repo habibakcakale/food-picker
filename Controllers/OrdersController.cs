@@ -1,18 +1,16 @@
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using FoodApp.Data;
-using FoodApp.Models;
+using Meal.Data;
+using Meal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodApp.Controllers
+namespace Meal.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
     [Authorize]
+    [Route("[controller]")]
     public class OrdersController : ControllerBase
     {
         private readonly FoodDbContext dbContext;
@@ -22,7 +20,8 @@ namespace FoodApp.Controllers
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> Post(OrderItem[] orderItems)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] OrderItem[] orderItems)
         {
             var date = GetTurkeyDate();
             var userId = User.GetId();
@@ -51,7 +50,7 @@ namespace FoodApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(DateTime? dateTime)
         {
-            var date = dateTime ?? GetTurkeyDate();
+            var date = dateTime?.Date ?? GetTurkeyDate();
             var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date).ToListAsync();
             return Ok(items);
         }
@@ -59,7 +58,7 @@ namespace FoodApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = dbContext.Orders.Attach(new Order() {Id = id});
+            var item = dbContext.Orders.Attach(new Order {Id = id});
             item.State = EntityState.Deleted;
             await dbContext.SaveChangesAsync();
             return Ok(item.Entity);
@@ -69,10 +68,5 @@ namespace FoodApp.Controllers
         {
             return DateTime.UtcNow.AddHours(3).Date;
         }
-    }
-
-    public static class IdentityExtensions
-    {
-        public static string GetId(this ClaimsPrincipal identity) => identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 }
