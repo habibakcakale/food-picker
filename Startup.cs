@@ -1,4 +1,6 @@
+using System.Net;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Meal.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -27,7 +29,14 @@ namespace Meal
             services.AddMemoryCache();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseSqlite("Data Source=food.db"));
             services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie().AddGoogle(options =>
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.Events.OnRedirectToLogin += context =>
+                {
+                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    return Task.CompletedTask;
+                };
+            }).AddGoogle(options =>
             {
                 options.ClientId = "";
                 options.ClientSecret = "";

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Meal.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +13,7 @@ namespace Meal.Controllers
         [HttpGet("login")]
         public IActionResult Login()
         {
-            if (!User.Identity.IsAuthenticated)
-                return new ChallengeResult(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
-                {
-                    RedirectUri = Url.ActionLink()
-                });
-            return Redirect("/");
+            return User.Identity.IsAuthenticated ? Redirect("/") : (IActionResult) Challenge(GoogleDefaults.AuthenticationScheme);
         }
 
         [Authorize, HttpGet]
