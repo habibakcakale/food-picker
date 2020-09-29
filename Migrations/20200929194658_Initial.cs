@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Meal.Migrations
 {
@@ -12,7 +13,7 @@ namespace Meal.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(maxLength: 200, nullable: false),
                     MealType = table.Column<int>(nullable: false)
                 },
@@ -26,7 +27,7 @@ namespace Meal.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(nullable: false),
                     UserId = table.Column<string>(nullable: false),
                     Date = table.Column<DateTime>(nullable: true)
@@ -41,7 +42,7 @@ namespace Meal.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MealType = table.Column<int>(nullable: false),
                     OrderId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(maxLength: 200, nullable: false)

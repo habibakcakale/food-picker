@@ -27,7 +27,7 @@ namespace Meal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
-            services.AddDbContextPool<FoodDbContext>(builder => builder.UseSqlite("Data Source=food.db"));
+            services.AddDbContextPool<FoodDbContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("RubyMeal")));
             services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
@@ -38,8 +38,8 @@ namespace Meal
                 };
             }).AddGoogle(options =>
             {
-                options.ClientId = Configuration.GetValue<string>("GOOGLE_ClientId");
-                options.ClientSecret = Configuration.GetValue<string>("GOOGLE_ClientSecret");;
+                options.ClientId = Configuration.GetValue<string>("GOOGLE:ClientId");
+                options.ClientSecret = Configuration.GetValue<string>("GOOGLE:ClientSecret");;
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; });
