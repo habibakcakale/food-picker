@@ -38,8 +38,8 @@ namespace Meal
                 };
             }).AddGoogle(options =>
             {
-                options.ClientId = "";
-                options.ClientSecret = "";
+                options.ClientId = Configuration.GetValue<string>("GOOGLE_ClientId");
+                options.ClientSecret = Configuration.GetValue<string>("GOOGLE_ClientSecret");;
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; });

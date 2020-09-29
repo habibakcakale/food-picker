@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Meal.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +13,12 @@ namespace Meal.Controllers
     public class AccountController : ControllerBase
     {
         [HttpGet("login")]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
-            return User.Identity.IsAuthenticated ? Redirect("/") : (IActionResult) Challenge(GoogleDefaults.AuthenticationScheme);
+            if (User.Identity.IsAuthenticated)
+                return Redirect("/");
+            await HttpContext.SignOutAsync();
+            return Challenge(GoogleDefaults.AuthenticationScheme);
         }
 
         [Authorize, HttpGet]
