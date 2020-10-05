@@ -21,11 +21,11 @@ namespace Meal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] OrderItem[] orderItems)
+        public async Task<IActionResult> Post([FromBody] OrderViewModel model)
         {
-            var date = GetTurkeyDate();
+            model.Date = model.Date.Date;
             var userId = User.GetId();
-            var order = await dbContext.Orders.FirstOrDefaultAsync(item => item.UserId == userId && item.Date == date);
+            var order = await dbContext.Orders.FirstOrDefaultAsync(item => item.UserId == userId && item.Date == model.Date);
             if (order != null)
             {
                 dbContext.Orders.Remove(order);
@@ -35,8 +35,8 @@ namespace Meal.Controllers
             {
                 FullName = User.Identity.Name,
                 UserId = userId,
-                Date = date,
-                OrderItems = orderItems.Where(item => item != null).Select(item =>
+                Date = model.Date,
+                OrderItems = model.OrderItems.Where(item => item != null).Select(item =>
                 {
                     item.Id = 0;
                     return item;
@@ -50,7 +50,7 @@ namespace Meal.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(DateTime? dateTime)
         {
-            var date = dateTime?.Date ?? GetTurkeyDate();
+            var date = dateTime?.Date ??  DateTime.UtcNow.AddHours(3).Date;
             var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date).ToListAsync();
             return Ok(items);
         }
@@ -62,11 +62,6 @@ namespace Meal.Controllers
             item.State = EntityState.Deleted;
             await dbContext.SaveChangesAsync();
             return Ok(item.Entity);
-        }
-
-        private static DateTime GetTurkeyDate()
-        {
-            return DateTime.UtcNow.AddHours(3).Date;
         }
     }
 }

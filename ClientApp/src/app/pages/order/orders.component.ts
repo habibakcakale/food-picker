@@ -30,6 +30,12 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     private foodGroups: { [type: string]: Meal[] };
     private user: User;
     private $dateSub: Subscription;
+    formatter = new Intl.DateTimeFormat("en-US", {
+        month: "numeric",
+        year: "numeric",
+        day: "numeric",
+        timeZone: "Europe/Istanbul"
+    });
 
     constructor(private elementRef: ElementRef<HTMLElement>,
                 public dialog: MatDialog,
@@ -38,17 +44,15 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
                 dateService: OrderDateService,
                 userService: UserService) {
         this.user = userService.user;
-        const formatter = new Intl.DateTimeFormat("en-US", {
-            month: "numeric",
-            year: "numeric",
-            day: "numeric",
-            timeZone: "Europe/Istanbul"
-        });
         this.$dateSub = dateService.subscribe((date: Date) => {
-            this.httpClient.get<Order[]>(`orders?dateTime=${formatter.format(date)}`, {observe: "body"}).pipe(map(orders => orders.map<TodaySelection>(mapOrderItem))).subscribe(orders => {
-                this.dataSource.data = orders;
-                this.dataSource.filter = '';
-            });
+            this.getOrders(date);
+        })
+    }
+
+    getOrders(date: Date) {
+        return this.httpClient.get<Order[]>(`orders?dateTime=${this.formatter.format(date)}`, {observe: "body"}).pipe(map(orders => orders.map<TodaySelection>(mapOrderItem))).subscribe(orders => {
+            this.dataSource.data = orders;
+            this.dataSource.filter = '';
         })
     }
 
@@ -76,8 +80,8 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
         const subscriber = dialogRef.afterClosed().subscribe(result => {
             subscriber.unsubscribe();
             if (result) {
-                const orderItems = Object.keys(result).map(key => result[key]).reduce((prev, curr) => prev.concat(curr), []);
-                this.httpClient.post<Order>("orders", orderItems).toPromise().then(res => {
+                const orderItems = [...result.mains, ...result.sideOrders, ...result.salads];
+                this.httpClient.post<Order>("orders", {orderItems, date: result.date}).toPromise().then(res => {
                     let index = this.dataSource.data.findIndex(item => item.userId == this.user.id);
                     if (index > -1)
                         this.dataSource.data.splice(index, 1);
