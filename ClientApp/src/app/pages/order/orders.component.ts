@@ -27,8 +27,8 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild(MatTable) table: MatTable<TodaySelection>;
     dataSource: MatTableDataSource<TodaySelection>;
     displayedColumns = ['fullName', 'mains', 'sideOrders', 'salad', 'actions'];
+    user: User;
     private foodGroups: { [type: string]: Meal[] };
-    private user: User;
     private $dateSub: Subscription;
     formatter = new Intl.DateTimeFormat("en-US", {
         month: "numeric",

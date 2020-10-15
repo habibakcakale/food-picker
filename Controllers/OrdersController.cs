@@ -50,7 +50,7 @@ namespace Meal.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(DateTime? dateTime)
         {
-            var date = dateTime?.Date ??  DateTime.UtcNow.AddHours(3).Date;
+            var date = dateTime?.Date ?? DateTime.UtcNow.AddHours(3).Date;
             var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date).ToListAsync();
             return Ok(items);
         }
@@ -58,10 +58,14 @@ namespace Meal.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = dbContext.Orders.Attach(new Order {Id = id});
-            item.State = EntityState.Deleted;
+            var item = await dbContext.Orders.FindAsync(id);
+            if (item.UserId != User.GetId()) 
+                return BadRequest();
+            
+            dbContext.Remove(item);
             await dbContext.SaveChangesAsync();
-            return Ok(item.Entity);
+            return Ok(item);
+
         }
     }
 }
