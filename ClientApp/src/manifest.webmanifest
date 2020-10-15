@@ -1,6 +1,6 @@
 {
-  "name": "Food App",
-  "short_name": "Food App",
+  "name": "Ruby Games - Meal",
+  "short_name": "Ruby Meal",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",
