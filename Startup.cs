@@ -1,10 +1,10 @@
-using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Meal.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -27,13 +27,17 @@ namespace Meal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
+            services.AddResponseCaching();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("RubyMeal")));
             services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
+                options.LoginPath = string.Empty;
+                options.AccessDeniedPath = string.Empty;
                 options.Events.OnRedirectToLogin += context =>
                 {
-                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    context.Response.Clear();
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return Task.CompletedTask;
                 };
             }).AddGoogle(options =>

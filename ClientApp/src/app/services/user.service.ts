@@ -23,7 +23,7 @@ export class UserService {
         resolve();
       }).catch(() => {
         reject();
-        location.replace("/account/login")
+        location.assign("/account/login")
       })
     })
   }

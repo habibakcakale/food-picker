@@ -1,18 +1,21 @@
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Meal.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Meal.Controllers
 {
+    using System.Security.Claims;
+    using System.Threading.Tasks;
+    
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Google;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    
+    using Meal.Models;
+    
     [ApiController]
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
         [HttpGet("login")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = int.MinValue)]
         public async Task<IActionResult> Login()
         {
             if (User.Identity.IsAuthenticated)
