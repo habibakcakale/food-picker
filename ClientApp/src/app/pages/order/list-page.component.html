@@ -3,7 +3,7 @@
     <div class="col-md-4" *ngFor="let pair of items | keyvalue">
       <mat-list dense>
         <h2 matSubheader>{{getType(pair.key)}}</h2>
-        <mat-list-item *ngFor="let item of pair.value; let last=last">
+        <mat-list-item *ngFor="let item of pair.value;">
           <p matLine>
             <span>{{item.name}} </span>
           </p>
