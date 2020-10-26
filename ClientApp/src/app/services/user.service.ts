@@ -1,30 +1,35 @@
 import {Injectable, InjectionToken} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {User} from "../models/user";
 
 export const USER_TOKEN = new InjectionToken("APP_USER");
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UserService {
-  private _user: User;
-  public get user(): User {
-    return this._user
-  };
+    private _user: User;
+    public get user(): User {
+        return this._user
+    };
 
-  constructor(private client: HttpClient) {
-  }
+    constructor(private client: HttpClient) {
+    }
 
-  init() {
-    return new Promise((resolve, reject) => {
-      this.client.get<User>("account").toPromise().then((resp) => {
-        this._user = resp
-        resolve();
-      }).catch(() => {
-        reject();
-        location.assign("/account/login")
-      })
-    })
-  }
+    init() {
+        return new Promise((resolve, reject) => {
+            const headers = new HttpHeaders({
+                "Authorization": `Bearer ${localStorage.getItem("AuthToken")}`
+            });
+            this.client.get<User>("account", {
+                headers: headers
+            }).toPromise().then((resp) => {
+                this._user = resp
+                resolve();
+            }).catch(() => {
+                this._user = null;
+                resolve();
+            })
+        })
+    }
 }

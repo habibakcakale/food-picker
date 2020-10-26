@@ -1,21 +1,23 @@
-using System.Text.Json;
-using System.Threading.Tasks;
-using Meal.Data;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace Meal
 {
+    using System.Text.Json;
+    using Meal.Data;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.HttpOverrides;
+    using Microsoft.AspNetCore.StaticFiles;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using System.Text;
+    using Microsoft.IdentityModel.Tokens;
+
     public class Startup
     {
+        private readonly FileExtensionContentTypeProvider manifestProvider = new FileExtensionContentTypeProvider {Mappings = {[".webmanifest"] = "application/manifest+json"}};
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -26,25 +28,19 @@ namespace Meal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
             services.AddMemoryCache();
             services.AddResponseCaching();
             services.AddDbContextPool<FoodDbContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("RubyMeal")));
             services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
-                options.LoginPath = string.Empty;
-                options.AccessDeniedPath = string.Empty;
-                options.Events.OnRedirectToLogin += context =>
+                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    context.Response.Clear();
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return Task.CompletedTask;
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetValue<string>("GOOGLE:ClientId")))
                 };
-            }).AddGoogle(options =>
-            {
-                options.ClientId = Configuration.GetValue<string>("GOOGLE:ClientId");
-                options.ClientSecret = Configuration.GetValue<string>("GOOGLE:ClientSecret");;
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; });
         }
@@ -54,8 +50,7 @@ namespace Meal
         {
             app.UseForwardedHeaders(new ForwardedHeadersOptions {ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto});
             app.UseAuthentication();
-            var provider = new FileExtensionContentTypeProvider {Mappings = {[".webmanifest"] = "application/manifest+json"}};
-            app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = provider});
+            app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = manifestProvider});
             app.UseRouting();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
@@ -66,7 +61,7 @@ namespace Meal
             }
             else
             {
-                app.UseSpaStaticFiles(new StaticFileOptions {ContentTypeProvider = provider});
+                app.UseSpaStaticFiles(new StaticFileOptions {ContentTypeProvider = manifestProvider});
                 app.UseSpa(spa => spa.Options.SourcePath = "ClientApp");
             }
         }

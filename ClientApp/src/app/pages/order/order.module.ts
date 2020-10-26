@@ -14,7 +14,6 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatCardModule} from '@angular/material/card';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatDialogModule} from "@angular/material/dialog";
-import {HttpClientModule} from "@angular/common/http";
 import {OrdersComponent} from "./orders.component";
 import {MealItemsResolver} from "./resolvers/meal-items.resolver";
 import {OrdersResolver} from "./resolvers/orders-resolver.service";
@@ -32,7 +31,6 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    HttpClientModule,
     RouterModule.forChild([
       {path: "", pathMatch: "full", redirectTo: "today"},
       {
