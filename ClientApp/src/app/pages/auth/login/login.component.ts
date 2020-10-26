@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {UserService} from "../../../services/user.service";
 
@@ -12,12 +12,14 @@ const AUTH_TOKEN = "AuthToken";
 export class LoginComponent implements OnInit {
     private url: string;
 
-    constructor(private route: ActivatedRoute, userService: UserService, private router: Router) {
+    constructor(private route: ActivatedRoute, userService: UserService, private router: Router, zone: NgZone) {
         window["getToken"] = (token) => {
-            localStorage.setItem(AUTH_TOKEN, token);
-            return userService.init().then(u => {
-                return this.router.navigate(['/'])
-            }).catch(c => console.log(c))
+            return zone.run(() => {
+                localStorage.setItem(AUTH_TOKEN, token);
+                return userService.init().then(u => {
+                    return this.router.navigate(['/'])
+                }).catch(c => console.log(c))
+            })
         }
     }
 
