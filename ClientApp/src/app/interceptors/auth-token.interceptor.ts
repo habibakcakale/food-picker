@@ -3,10 +3,10 @@ import {
     HttpRequest,
     HttpHandler,
     HttpEvent,
-    HttpInterceptor, HttpResponse, HttpErrorResponse
+    HttpInterceptor, HttpErrorResponse
 } from '@angular/common/http';
-import {Observable, of, throwError} from 'rxjs';
-import {catchError, tap} from "rxjs/operators";
+import {Observable, of} from 'rxjs';
+import {catchError} from "rxjs/operators";
 import {UserService} from "../services/user.service";
 import {Router} from "@angular/router";
 
@@ -26,7 +26,7 @@ export class AuthTokenInterceptor implements HttpInterceptor {
             return next.handle(request.clone({
                 headers: request.headers.set("Authorization", `Bearer ${localStorage.getItem(AUTH_TOKEN)}`)
             })).pipe(catchError((err, resp) => {
-                if (err instanceof HttpErrorResponse && (err.status & 400) == 400) {
+                if (err instanceof HttpErrorResponse && 500 > err.status && err.status >= 400) {
                     localStorage.removeItem(AUTH_TOKEN)
                     return this.router.navigate(["login"]);
                 }

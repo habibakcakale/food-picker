@@ -25,15 +25,39 @@ namespace Meal.Controllers
         {
             model.Date = model.Date.Date;
             var userId = User.GetId();
-            var order = await dbContext.Orders.FirstOrDefaultAsync(item => item.UserId == userId && item.Date == model.Date);
+            var order = await dbContext.Orders.FirstOrDefaultAsync(item =>
+                item.UserId == userId && item.Date == model.Date);
             if (order != null)
             {
                 dbContext.Orders.Remove(order);
             }
 
-            order = new Order
+            if (!await dbContext.Users.AnyAsync(item => item.UserId == userId))
             {
-                FullName = User.Identity.Name,
+                order = MapOrder(model, userId);
+                order.User = new User {UserId = userId, FullName = User.Identity?.Name};
+            }
+            else
+            {
+                order = MapOrder(model, userId);
+            }
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+            return Ok(MapOrder(order));
+        }
+
+        private static OrderViewModel MapOrder(Order order) => new()
+        {
+            Date = order.Date ?? DateTime.Today,
+            Id = order.Id,
+            OrderItems = order.OrderItems.ToArray()
+        };
+
+        private static Order MapOrder(OrderViewModel model, string userId)
+        {
+            return new()
+            {
                 UserId = userId,
                 Date = model.Date,
                 OrderItems = model.OrderItems.Where(item => item != null).Select(item =>
@@ -42,16 +66,14 @@ namespace Meal.Controllers
                     return item;
                 }).ToList()
             };
-            dbContext.Orders.Add(order);
-            await dbContext.SaveChangesAsync();
-            return Ok(order);
         }
 
         [HttpGet]
         public async Task<IActionResult> Get(DateTime? dateTime)
         {
             var date = dateTime?.Date ?? DateTime.UtcNow.AddHours(3).Date;
-            var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date).ToListAsync();
+            var items = await dbContext.Orders.Include(item => item.OrderItems).Where(item => item.Date == date)
+                .ToListAsync();
             return Ok(items);
         }
 
@@ -59,13 +81,12 @@ namespace Meal.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var item = await dbContext.Orders.FindAsync(id);
-            if (item.UserId != User.GetId()) 
+            if (item.UserId != User.GetId())
                 return BadRequest();
-            
+
             dbContext.Remove(item);
             await dbContext.SaveChangesAsync();
             return Ok(item);
-
         }
     }
 }
