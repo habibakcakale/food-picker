@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Meal.Migrations
 {
     [DbContext(typeof(FoodDbContext))]
-    [Migration("20210325123425_Users")]
-    partial class Users
+    [Migration("20210325191045_User")]
+    partial class User
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -89,17 +89,28 @@ namespace Meal.Migrations
 
             modelBuilder.Entity("Meal.Models.User", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Picture")
                         .HasColumnType("text");
 
                     b.Property<string>("SlackId")
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("User");
                 });

@@ -1,7 +1,8 @@
 export interface User {
-  name: string;
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+    id: string;
+    name: string;
+    email: string;
+    lastName: string;
+    firstName: string;
+    slackId: string;
 }

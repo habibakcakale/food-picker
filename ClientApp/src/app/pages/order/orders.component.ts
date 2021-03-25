@@ -24,9 +24,8 @@ import {ConfirmDialogComponent} from "./confirm-dialog.component";
 export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
-    @ViewChild(MatTable) table: MatTable<TodaySelection>;
     dataSource: MatTableDataSource<TodaySelection>;
-    displayedColumns = ['fullName', 'mains', 'sideOrders', 'salad', 'actions'];
+    displayedColumns = ['name', 'mains', 'sideOrders', 'salad', 'actions'];
     user: User;
     private foodGroups: { [type: string]: Meal[] };
     private $dateSub: Subscription;
@@ -65,7 +64,6 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     ngAfterViewInit() {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-        this.table.dataSource = this.dataSource;
     }
 
     openNewOrder() {
@@ -104,7 +102,7 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
 
     removeOrder(row: Order) {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-            data: {fullName: row.fullName}
+            data: {fullName: row.user?.name}
         });
         const subscriber = dialogRef.afterClosed().subscribe(result => {
             subscriber.unsubscribe();
@@ -119,7 +117,7 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     print() {
-        const rows = this.dataSource.data.map(item => `<tr><td style="font-weight: 700;">${item.fullName}</td><td>${item.mains}</td><td>${item.sideOrders}</td><td>${item.salad}</td></tr>`)
+        const rows = this.dataSource.data.map(item => `<tr><td style="font-weight: 700;">${item.user?.name}</td><td>${item.mains}</td><td>${item.sideOrders}</td><td>${item.salad}</td></tr>`)
         const table = `
 <link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css">
 <table class="table table-stripped">

@@ -1,13 +1,15 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Meal.Data;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Meal.Controllers
-{
+namespace Meal.Controllers {
     using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.WebUtilities;
@@ -19,23 +21,24 @@ namespace Meal.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Meal.Models;
 
+
     [ApiController]
     [Route("account")]
-    public class AccountController : ControllerBase
-    {
+    public class AccountController : ControllerBase {
         private readonly IConfiguration configuration;
         private readonly IHttpClientFactory factory;
+        private readonly FoodDbContext dbContext;
+        private const string PictureClaimType = "picture";
 
-        public AccountController(IConfiguration configuration, IHttpClientFactory factory)
-        {
+        public AccountController(IConfiguration configuration, IHttpClientFactory factory, FoodDbContext dbContext) {
             this.configuration = configuration;
             this.factory = factory;
+            this.dbContext = dbContext;
         }
 
         [HttpGet("login")]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = int.MinValue)]
-        public async Task<IActionResult> Login()
-        {
+        public async Task<IActionResult> Login() {
             if (User.Identity.IsAuthenticated)
                 return Redirect("/");
             await HttpContext.SignOutAsync();
@@ -44,34 +47,53 @@ namespace Meal.Controllers
 
         [HttpGet("login-callback")]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = int.MinValue)]
-        public async Task<IActionResult> GoogleResponse(string code)
-        {
+        public async Task<IActionResult> GoogleResponse(string code) {
             var token = await ExchangeCodeAsync(code, Url.ActionLink("GoogleResponse", "Account"));
             var request = new HttpRequestMessage(HttpMethod.Get, "https://www.googleapis.com/oauth2/v2/userinfo");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
-
             var response = await factory.CreateClient().SendAsync(request);
-
+            response.EnsureSuccessStatusCode();
             using var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-            var authToken = GenerateJwtToken(payload);
+
+            var userInfo = MapUserInfo(payload.RootElement);
+            await PersistUser(userInfo);
+
+            var authToken = GenerateJwtToken(userInfo);
             return Content($"<script>opener.getToken({JsonSerializer.Serialize(authToken)}); close()</script>", "text/html");
         }
 
-        private string GenerateJwtToken(JsonDocument payload)
-        {
+        private async Task PersistUser(User userInfo) {
+            if (!await dbContext.Users.AnyAsync(item => item.Id == userInfo.Id)) {
+                dbContext.Users.Add(userInfo);
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        private User MapUserInfo(JsonElement payload) {
+            var user = new User {
+                Id = payload.GetString("id") ?? throw new ArgumentNullException(),
+                Name = payload.GetString("name") ?? string.Empty,
+                FirstName = payload.GetString("given_name") ?? string.Empty,
+                LastName = payload.GetString("family_name") ?? string.Empty,
+                Email = payload.GetString("email") ?? string.Empty,
+                Picture = payload.GetString("picture") ?? string.Empty,
+                SlackId = string.Empty
+            };
+            return user;
+        }
+
+        private string GenerateJwtToken(User user) {
             // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(configuration.GetValue<string>("GOOGLE:ClientId"));
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, payload.RootElement.GetString("id")),
-                    new Claim(ClaimTypes.Name, payload.RootElement.GetString("name")),
-                    new Claim(ClaimTypes.GivenName, payload.RootElement.GetString("given_name")),
-                    new Claim(ClaimTypes.Surname, payload.RootElement.GetString("family_name")),
-                    new Claim(ClaimTypes.Email, payload.RootElement.GetString("email")),
-                    new Claim("picture", payload.RootElement.GetString("picture")), 
+            var tokenDescriptor = new SecurityTokenDescriptor {
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.GivenName, user.FirstName),
+                    new Claim(ClaimTypes.Surname, user.LastName),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(PictureClaimType, user.Picture)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -81,13 +103,10 @@ namespace Meal.Controllers
         }
 
         [Authorize, HttpGet]
-        public IActionResult UserInfo()
-        {
-            var userInfo = new UserInfo {Name = User.Identity.Name ?? string.Empty};
-            foreach (var claim in User.Claims)
-            {
-                switch (claim.Type)
-                {
+        public IActionResult UserInfo() {
+            var userInfo = new User() {Name = User.Identity?.Name ?? string.Empty};
+            foreach (var claim in User.Claims) {
+                switch (claim.Type) {
                     case ClaimTypes.Email:
                         userInfo.Email = claim.Value;
                         break;
@@ -100,6 +119,9 @@ namespace Meal.Controllers
                     case ClaimTypes.Surname:
                         userInfo.LastName = claim.Value;
                         break;
+                    case PictureClaimType:
+                        userInfo.Picture = claim.Value;
+                        break;
                 }
             }
 
@@ -107,13 +129,11 @@ namespace Meal.Controllers
         }
 
         [HttpGet(nameof(BuildChallengeUrl))]
-        public IActionResult BuildChallengeUrl()
-        {
+        public IActionResult BuildChallengeUrl() {
             // Google Identity Platform Manual:
             // https://developers.google.com/identity/protocols/OAuth2WebServer
 
-            var queryStrings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
+            var queryStrings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
                 {"response_type", "code"},
                 {"client_id", configuration.GetValue<string>("GOOGLE:ClientId")},
                 {"redirect_uri", Url.ActionLink("GoogleResponse", "Account")},
@@ -123,10 +143,8 @@ namespace Meal.Controllers
             return Ok(new {url});
         }
 
-        protected virtual async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
-        {
-            var tokenRequestParameters = new Dictionary<string, string>()
-            {
+        protected virtual async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri) {
+            var tokenRequestParameters = new Dictionary<string, string>() {
                 {"client_id", configuration.GetValue<string>("GOOGLE:ClientId")},
                 {"redirect_uri", redirectUri},
                 {"client_secret", configuration.GetValue<string>("GOOGLE:ClientSecret")},
@@ -139,20 +157,17 @@ namespace Meal.Controllers
             requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             requestMessage.Content = requestContent;
             var response = await factory.CreateClient().SendAsync(requestMessage);
-            if (response.IsSuccessStatusCode)
-            {
-                var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                return OAuthTokenResponse.Success(payload);
-            }
-            else
-            {
+            if (!response.IsSuccessStatusCode) {
                 throw new Exception("Invalid Code Response");
             }
+
+            var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            return OAuthTokenResponse.Success(payload);
         }
     }
 
-    public static class IdentityExtensions
-    {
-        public static string GetId(this ClaimsPrincipal identity) => identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    public static class IdentityExtensions {
+        public static string GetId(this ClaimsPrincipal identity) =>
+            identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 }

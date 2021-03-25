@@ -1,9 +1,9 @@
 import {Component, Inject} from '@angular/core';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {User} from "../../../models/user";
-import {UserService} from "../../../services/user.service";
 import {Meal} from "../../../models/order";
+import {UserService} from "../../../services/user.service";
+import {User} from "../../../models/user";
 
 @Component({
     selector: 'app-new-order',

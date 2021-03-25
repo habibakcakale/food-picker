@@ -1,3 +1,5 @@
+using Meal.Models;
+
 namespace Meal
 {
     using System.Text.Json;
@@ -16,7 +18,8 @@ namespace Meal
 
     public class Startup
     {
-        private readonly FileExtensionContentTypeProvider manifestProvider = new FileExtensionContentTypeProvider {Mappings = {[".webmanifest"] = "application/manifest+json"}};
+        private readonly FileExtensionContentTypeProvider manifestProvider = new FileExtensionContentTypeProvider
+            {Mappings = {[".webmanifest"] = "application/manifest+json"}};
 
         public Startup(IConfiguration configuration)
         {
@@ -35,7 +38,7 @@ namespace Meal
             services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp/dist");
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
                     ValidateIssuer = false,
@@ -43,12 +46,15 @@ namespace Meal
                 };
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; });
+            services.Configure<SlackOptions>(Configuration.GetSection("SLACK"));
+            services.ConfigureQuartz();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions {ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto});
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto});
             app.UseAuthentication();
             app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = manifestProvider});
             app.UseRouting();

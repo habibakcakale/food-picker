@@ -25,10 +25,10 @@ export class UserService {
                 headers: headers
             }).toPromise().then((resp) => {
                 this._user = resp
-                resolve();
+                resolve(resp);
             }).catch(() => {
                 this._user = null;
-                resolve();
+                resolve(null);
             })
         })
     }
