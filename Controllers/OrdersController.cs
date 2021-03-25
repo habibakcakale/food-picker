@@ -20,6 +20,7 @@ namespace Meal.Controllers {
         public async Task<IActionResult> Post([FromBody] OrderViewModel model) {
             model.Date = model.Date.Date;
             var userId = User.GetId();
+            await CheckUser(userId);
             var order = await dbContext.Orders.FirstOrDefaultAsync(item => item.UserId == userId && item.Date == model.Date);
             if (order != null) {
                 dbContext.Orders.Remove(order);
@@ -31,6 +32,19 @@ namespace Meal.Controllers {
             await dbContext.SaveChangesAsync();
             await entityRef.Reference(item => item.User).LoadAsync();
             return Ok(MapOrder(entityRef.Entity));
+        }
+
+        /// <summary>
+        /// Migration purpose only
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private async Task CheckUser(string userId) {
+            if (!await dbContext.Users.AnyAsync(item => item.Id == userId)) {
+                var user = User.ToUser();
+                dbContext.Users.Add(user);
+                await dbContext.SaveChangesAsync();
+            }
         }
 
         private static OrderViewModel MapOrder(Order order) {

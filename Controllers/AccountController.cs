@@ -28,7 +28,6 @@ namespace Meal.Controllers {
         private readonly IConfiguration configuration;
         private readonly IHttpClientFactory factory;
         private readonly FoodDbContext dbContext;
-        private const string PictureClaimType = "picture";
 
         public AccountController(IConfiguration configuration, IHttpClientFactory factory, FoodDbContext dbContext) {
             this.configuration = configuration;
@@ -93,7 +92,7 @@ namespace Meal.Controllers {
                     new Claim(ClaimTypes.GivenName, user.FirstName),
                     new Claim(ClaimTypes.Surname, user.LastName),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(PictureClaimType, user.Picture)
+                    new Claim(IdentityExtensions.PictureClaimType, user.Picture)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -104,26 +103,7 @@ namespace Meal.Controllers {
 
         [Authorize, HttpGet]
         public IActionResult UserInfo() {
-            var userInfo = new User() {Name = User.Identity?.Name ?? string.Empty};
-            foreach (var claim in User.Claims) {
-                switch (claim.Type) {
-                    case ClaimTypes.Email:
-                        userInfo.Email = claim.Value;
-                        break;
-                    case ClaimTypes.NameIdentifier:
-                        userInfo.Id = claim.Value;
-                        break;
-                    case ClaimTypes.GivenName:
-                        userInfo.FirstName = claim.Value;
-                        break;
-                    case ClaimTypes.Surname:
-                        userInfo.LastName = claim.Value;
-                        break;
-                    case PictureClaimType:
-                        userInfo.Picture = claim.Value;
-                        break;
-                }
-            }
+            var userInfo = User.ToUser();
 
             return Ok(userInfo);
         }
@@ -167,6 +147,33 @@ namespace Meal.Controllers {
     }
 
     public static class IdentityExtensions {
+        public const string PictureClaimType = "picture";
+
+        public static User ToUser(this ClaimsPrincipal principal) {
+            var userInfo = new User() {Name = principal.Identity?.Name ?? string.Empty};
+            foreach (var claim in principal.Claims) {
+                switch (claim.Type) {
+                    case ClaimTypes.Email:
+                        userInfo.Email = claim.Value;
+                        break;
+                    case ClaimTypes.NameIdentifier:
+                        userInfo.Id = claim.Value;
+                        break;
+                    case ClaimTypes.GivenName:
+                        userInfo.FirstName = claim.Value;
+                        break;
+                    case ClaimTypes.Surname:
+                        userInfo.LastName = claim.Value;
+                        break;
+                    case PictureClaimType:
+                        userInfo.Picture = claim.Value;
+                        break;
+                }
+            }
+
+            return userInfo;
+        }
+
         public static string GetId(this ClaimsPrincipal identity) =>
             identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
