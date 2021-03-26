@@ -37,8 +37,8 @@ namespace Meal.Jobs {
                         blocks: new IBlock[] {
                             new SectionBlock() {
                                 text = new Text() {type = "mrkdwn", text = "Still have time to pick food."},
-                                accessory = new ButtonElement() {
-                                    url = "https://meal.rubygamestudio.com/today",
+                                accessory = new ButtonElement {
+                                    url = slackOptions.Url,
                                     action_id = "click",
                                     text = new Text() {text = "Pick"}
                                 }
