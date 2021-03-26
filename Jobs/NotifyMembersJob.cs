@@ -43,7 +43,7 @@ namespace Meal.Jobs {
                                     text = new Text() {text = "Pick"}
                                 }
                             }
-                        }, botName: "Pick Meal!");
+                        });
                 }
             }
         }
