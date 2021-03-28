@@ -1,15 +1,14 @@
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Meal.Data;
-using Meal.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Quartz;
-using SlackAPI;
-
 namespace Meal.Jobs {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Options;
+    using Quartz;
+    using SlackAPI;
+    using Data;
+    using Models;
+
     public class NotifyMembersJob : IJob {
         private readonly FoodDbContext dbContext;
         private readonly SlackOptions slackOptions;
@@ -23,20 +22,16 @@ namespace Meal.Jobs {
             var query = from user in dbContext.Users
                 join order in dbContext.Orders.Where(item => item.Date == DateTime.Today) on user.Id equals order.UserId into orders
                 from todayOrder in orders.DefaultIfEmpty()
+                where !string.IsNullOrWhiteSpace(user.SlackId)
                 select user;
             var users = await query.ToListAsync();
             if (users.Any()) {
                 var slackClient = new SlackClient(slackOptions.Token);
-                var builder = new StringBuilder();
-                foreach (var user in users) {
-                    builder.AppendFormat("<@{0}>{1}", user.SlackId, users.Last() == user ? string.Empty : ", ");
-                }
-
                 foreach (var user in users) {
                     slackClient.PostMessage(response => response.AssertOk(), user.SlackId, string.Empty,
                         blocks: new IBlock[] {
                             new SectionBlock() {
-                                text = new Text() {type = "mrkdwn", text = "Still have time to pick food."},
+                                text = new Text {type = "mrkdwn", text = "Still have time to pick a meal."},
                                 accessory = new ButtonElement {
                                     url = slackOptions.Url,
                                     action_id = "click",

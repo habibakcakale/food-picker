@@ -24,6 +24,7 @@ namespace Meal.Jobs {
             var query = from user in dbContext.Users
                 join order in dbContext.Orders.Where(item => item.Date == DateTime.Today) on user.Id equals order.UserId into orders
                 from todayOrder in orders.DefaultIfEmpty()
+                where !string.IsNullOrWhiteSpace(user.SlackId)
                 select user;
             var users = await query.ToListAsync();
             if (users.Any()) {
