@@ -11,10 +11,12 @@ namespace Meal.Jobs {
 
     public class NotifyMembersJob : IJob {
         private readonly FoodDbContext dbContext;
+        private readonly SlackClient slackClient;
         private readonly SlackOptions slackOptions;
 
-        public NotifyMembersJob(FoodDbContext dbContext, IOptions<SlackOptions> options) {
+        public NotifyMembersJob(FoodDbContext dbContext, SlackClient slackClient, IOptions<SlackOptions> options) {
             this.dbContext = dbContext;
+            this.slackClient = slackClient;
             this.slackOptions = options.Value;
         }
 
@@ -22,15 +24,14 @@ namespace Meal.Jobs {
             var query = from user in dbContext.Users
                 join order in dbContext.Orders.Where(item => item.Date == DateTime.Today) on user.Id equals order.UserId into orders
                 from todayOrder in orders.DefaultIfEmpty()
-                where !string.IsNullOrWhiteSpace(user.SlackId)
+                where !string.IsNullOrWhiteSpace(user.SlackId) && todayOrder == null
                 select user;
             var users = await query.ToListAsync();
             if (users.Any()) {
-                var slackClient = new SlackClient(slackOptions.Token);
                 foreach (var user in users) {
                     slackClient.PostMessage(response => response.AssertOk(), user.SlackId, string.Empty,
                         blocks: new IBlock[] {
-                            new SectionBlock() {
+                            new SectionBlock {
                                 text = new Text {type = "mrkdwn", text = "Still have time to pick a meal."},
                                 accessory = new ButtonElement {
                                     url = slackOptions.Url,
