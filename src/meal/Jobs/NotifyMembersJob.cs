@@ -7,16 +7,19 @@ namespace Meal.Jobs {
     using Quartz;
     using SlackAPI;
     using Data;
+    using Microsoft.Extensions.Logging;
     using Models;
 
     public class NotifyMembersJob : IJob {
         private readonly FoodDbContext dbContext;
         private readonly SlackClient slackClient;
+        private readonly ILogger<NotifyMembersJob> logger;
         private readonly SlackOptions slackOptions;
 
-        public NotifyMembersJob(FoodDbContext dbContext, SlackClient slackClient, IOptions<SlackOptions> options) {
+        public NotifyMembersJob(FoodDbContext dbContext, SlackClient slackClient, IOptions<SlackOptions> options, ILogger<NotifyMembersJob> logger) {
             this.dbContext = dbContext;
             this.slackClient = slackClient;
+            this.logger = logger;
             this.slackOptions = options.Value;
         }
 
@@ -29,7 +32,11 @@ namespace Meal.Jobs {
             var users = await query.ToListAsync();
             if (users.Any()) {
                 foreach (var user in users) {
-                    slackClient.PostMessage(response => response.AssertOk(), user.SlackId, string.Empty,
+                    slackClient.PostMessage(response => {
+                            if (!response.ok) {
+                                logger.LogError("Error occured while sending slack message {SlackError}", response.error);
+                            }
+                        }, user.SlackId, string.Empty,
                         blocks: new IBlock[] {
                             new SectionBlock {
                                 text = new Text {type = "mrkdwn", text = "Still have time to pick a meal."},
