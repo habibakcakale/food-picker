@@ -43,7 +43,7 @@ import {AuthTokenInterceptor} from "./interceptors/auth-token.interceptor";
         MatToolbarModule,
         MatSidenavModule,
         MatListModule,
-        ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production})
+        // ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production})
     ],
     providers: [
         {provide: APP_INITIALIZER, useFactory: userInit, deps: [UserService], multi: true},
