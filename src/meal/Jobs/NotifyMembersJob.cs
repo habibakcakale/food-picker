@@ -39,11 +39,15 @@ namespace Meal.Jobs {
                         }, user.SlackId, string.Empty,
                         blocks: new IBlock[] {
                             new SectionBlock {
-                                text = new Text {type = "mrkdwn", text = "Still have time to pick a meal."},
+                                text = new Text {
+                                    type = "mrkdwn",
+                                    text = "Still have time to pick a meal."
+                                },
                                 accessory = new ButtonElement {
+                                    text = new Text {type = "plain_text", text = "Pick", emoji = true},
+                                    value = "pick_meal",
                                     url = slackOptions.Url,
-                                    action_id = "click",
-                                    text = new Text() {text = "Pick"}
+                                    action_id = "button-pick-meal"
                                 }
                             }
                         });
