@@ -11,16 +11,19 @@ import {TodaySelection} from "../../models/today-selection";
 import {mapOrderItem} from "./utilities";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/user";
-import {OrderDateService} from "./order-date.service";
 import {map} from "rxjs/operators";
 import {Subscription} from "rxjs";
 import {ConfirmDialogComponent} from "./confirm-dialog.component";
+import {OrderToolBarService} from "./order-tool-bar.service";
+import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
+import * as Url from "url";
 
 @Component({
     selector: 'app-today-selection',
     templateUrl: './orders.component.html',
     styleUrls: ['./orders.component.scss']
 })
+@UntilDestroy()
 export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
@@ -40,11 +43,22 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
                 public dialog: MatDialog,
                 private activatedRoute: ActivatedRoute,
                 private httpClient: HttpClient,
-                dateService: OrderDateService,
+                toolBarService: OrderToolBarService,
                 userService: UserService) {
         this.user = userService.user;
-        this.$dateSub = dateService.subscribe((date: Date) => {
-            this.getOrders(date);
+        this.$dateSub = toolBarService.state$.pipe(untilDestroyed(this)).subscribe(({type, payload}) => {
+            switch (type) {
+                case 'date':
+                    this.getOrders(payload);
+                    break;
+                case 'export':
+                    if (payload == 'excel') {
+                        this.downloadToCsv();
+                    } else if (payload == 'print') {
+                        this.print();
+                    }
+                    break;
+            }
         })
     }
 
@@ -116,23 +130,17 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
         })
     }
 
+    downloadToCsv() {
+        const data = this.dataSource.data.map(item => `${item.user?.name},${item.mains},${item.sideOrders},${item.salad}`);
+        data.unshift('Isim,Ana Yemek,Ara Yemek,Salata');
+        const blob = new Blob([data.join('\n')], {type: 'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        window.open(url)
+    }
+
     print() {
         const rows = this.dataSource.data.map(item => `<tr><td style="font-weight: 700;">${item.user?.name}</td><td>${item.mains}</td><td>${item.sideOrders}</td><td>${item.salad}</td></tr>`)
-        const table = `
-<link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css">
-<table class="table table-stripped">
-<thead>
-    <tr>
-        <th>Isim</th>
-        <th>Ana Yemek</th>
-        <th>Ara Yemek</th>
-        <th>Salata</th>
-    </tr>
-  </thead>
-  <tbody>
-  ${rows.join("")}
-  </tbody>
-  </table>`;
+        const table = `\n<link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css">\n<table class="table table-stripped">\n<thead>\n    <tr>\n        <th>Isim</th>\n        <th>Ana Yemek</th>\n        <th>Ara Yemek</th>\n        <th>Salata</th>\n    </tr>\n  </thead>\n  <tbody>\n  ${rows.join("")}\n  </tbody>\n  </table>`;
         const newTab = open("about:blank");
         newTab.document.body.innerHTML = table;
     }

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrderDatePickerComponent } from './order-date-picker.component';
+import { OrderDatePickerComponent } from './order-tool-bar.component';
 
 describe('OrderDatePickerComponent', () => {
   let component: OrderDatePickerComponent;

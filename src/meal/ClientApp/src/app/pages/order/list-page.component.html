@@ -1,28 +1,23 @@
-<div class="mat-elevation-z8">
-  <div class="row">
-    <div class="col-md-4" *ngFor="let pair of items | keyvalue">
-      <mat-list dense>
-        <h2 matSubheader>{{getType(pair.key)}}</h2>
-        <mat-list-item *ngFor="let item of pair.value;">
-          <p matLine>
-            <span>{{item.name}} </span>
-          </p>
-          <button mat-icon-button (click)="removeFood(item)">
-            <mat-icon matListIcon>delete</mat-icon>
-          </button>
-        </mat-list-item>
-        <mat-list-item>
-          <mat-form-field class="full-width" matLine>
-            <mat-label>Yeni {{getType(pair.key)}} ekle.</mat-label>
-            <input matInput (keydown.enter)="saveFoods($event.target, pair.key)" [placeholder]="getType(pair.key)"/>
-          </mat-form-field>
-        </mat-list-item>
-      </mat-list>
-    </div>
-  </div>
-  <mat-grid-list cols="3">
-    <mat-grid-tile >
-
-    </mat-grid-tile>
-  </mat-grid-list>
-</div>
+<mat-card *ngFor="let pair of items | keyvalue">
+    <mat-card-content>
+        <div>
+            <mat-list dense class="mat-elevation-z8">
+                <h2 matSubheader>{{getType(pair.key)}}</h2>
+                <mat-list-item *ngFor="let item of pair.value;">
+                    <p matLine>
+                        <span>{{item.name}} </span>
+                    </p>
+                    <button mat-icon-button (click)="removeFood(item)">
+                        <mat-icon matListIcon>delete</mat-icon>
+                    </button>
+                </mat-list-item>
+                <mat-list-item>
+                    <mat-form-field class="full-width" matLine>
+                        <mat-label>Yeni {{getType(pair.key)}} ekle.</mat-label>
+                        <input matInput (keydown.enter)="saveFoods($event.target, pair.key)" [placeholder]="getType(pair.key)"/>
+                    </mat-form-field>
+                </mat-list-item>
+            </mat-list>
+        </div>
+    </mat-card-content>
+</mat-card>

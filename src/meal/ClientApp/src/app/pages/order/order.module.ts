@@ -19,55 +19,57 @@ import {MealItemsResolver} from "./resolvers/meal-items.resolver";
 import {OrdersResolver} from "./resolvers/orders-resolver.service";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatNativeDateModule} from "@angular/material/core";
-import {OrderDatePickerComponent} from './order-date-picker.component';
+import {OrderToolBarComponent} from './order-tool-bar.component';
 import {MatGridListModule} from "@angular/material/grid-list";
 import {MatListModule} from "@angular/material/list";
-import { ConfirmDialogComponent } from './confirm-dialog.component';
+import {ConfirmDialogComponent} from './confirm-dialog.component';
+import {MatMenuModule} from "@angular/material/menu";
 
 
 @NgModule({
-  declarations: [ListPageComponent, OrdersComponent, NewOrderComponent, OrderDatePickerComponent, ConfirmDialogComponent],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    RouterModule.forChild([
-      {path: "", pathMatch: "full", redirectTo: "today"},
-      {
-        path: "list", component: ListPageComponent, resolve: {
-          foodItems: MealItemsResolver
-        }
-      },
-      {
-        path: "today", children: [{
-          path: '',
-          component: OrdersComponent, resolve: {
-            foodItems: MealItemsResolver,
-            orders: OrdersResolver
-          }
-        },
-          {
-            path: '',
-            component: OrderDatePickerComponent,
-            outlet: 'toolbar'
-          }],
-      }
-    ]),
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatIconModule,
-    MatButtonModule,
-    MatInputModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatCardModule,
-    MatDialogModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatGridListModule,
-    MatListModule
-  ]
+    declarations: [ListPageComponent, OrdersComponent, NewOrderComponent, OrderToolBarComponent, ConfirmDialogComponent],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule.forChild([
+            {path: "", pathMatch: "full", redirectTo: "today"},
+            {
+                path: "list", component: ListPageComponent, resolve: {
+                    foodItems: MealItemsResolver
+                }
+            },
+            {
+                path: "today", children: [{
+                    path: '',
+                    component: OrdersComponent, resolve: {
+                        foodItems: MealItemsResolver,
+                        orders: OrdersResolver
+                    }
+                },
+                    {
+                        path: '',
+                        component: OrderToolBarComponent,
+                        outlet: 'toolbar'
+                    }],
+            }
+        ]),
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatIconModule,
+        MatButtonModule,
+        MatInputModule,
+        MatSelectModule,
+        MatRadioModule,
+        MatCardModule,
+        MatDialogModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatGridListModule,
+        MatListModule,
+        MatMenuModule
+    ]
 })
 export class OrderModule {
 }
