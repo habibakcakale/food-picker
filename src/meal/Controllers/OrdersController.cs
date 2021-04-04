@@ -1,14 +1,12 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Meal.Data;
-using Meal.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
 namespace Meal.Controllers {
-    using System.Security.Claims;
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Data;
+    using Models;
 
     [Authorize]
     [Route("[controller]")]

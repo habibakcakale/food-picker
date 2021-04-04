@@ -2,8 +2,6 @@ import {Injectable, InjectionToken} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {User} from "../models/user";
 
-export const USER_TOKEN = new InjectionToken("APP_USER");
-
 @Injectable({
     providedIn: 'root'
 })

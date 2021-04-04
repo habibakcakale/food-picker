@@ -1,14 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Meal.Data;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-
 namespace Meal.Controllers {
     using System;
     using System.Collections.Generic;
@@ -16,10 +5,19 @@ namespace Meal.Controllers {
     using Microsoft.Extensions.Configuration;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using System.Text.Json;
+    using Microsoft.AspNetCore.Authentication.OAuth;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.IdentityModel.Tokens;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Meal.Models;
+    using Models;
+    using Data;
 
 
     [ApiController]
@@ -38,7 +36,7 @@ namespace Meal.Controllers {
         [HttpGet("login")]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None, Duration = int.MinValue)]
         public async Task<IActionResult> Login() {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
                 return Redirect("/");
             await HttpContext.SignOutAsync();
             return Challenge();
@@ -87,12 +85,12 @@ namespace Meal.Controllers {
             var key = Encoding.ASCII.GetBytes(configuration.GetValue<string>("GOOGLE:ClientId"));
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new[] {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.GivenName, user.FirstName),
-                    new Claim(ClaimTypes.Surname, user.LastName),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(IdentityExtensions.PictureClaimType, user.Picture)
+                    new Claim(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+                    new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                    new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+                    new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
+                    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                    new Claim(IdentityExtensions.PictureClaimType, user.Picture ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
