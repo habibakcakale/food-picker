@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {MatTable, MatTableDataSource} from '@angular/material/table';
+import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from "@angular/material/dialog";
 import {NewOrderComponent} from "./new-order/new-order.component";
 import {ActivatedRoute} from "@angular/router";
@@ -12,11 +12,10 @@ import {mapOrderItem} from "./utilities";
 import {UserService} from "../../services/user.service";
 import {User} from "../../models/user";
 import {map} from "rxjs/operators";
-import {Subscription} from "rxjs";
 import {ConfirmDialogComponent} from "./confirm-dialog.component";
 import {OrderToolBarService} from "./order-tool-bar.service";
 import {UntilDestroy, untilDestroyed} from "@ngneat/until-destroy";
-import * as Url from "url";
+import * as XLSX from 'xlsx';
 
 @Component({
     selector: 'app-today-selection',
@@ -31,7 +30,6 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     displayedColumns = ['name', 'mains', 'sideOrders', 'salad', 'actions'];
     user: User;
     private foodGroups: { [type: string]: Meal[] };
-    private $dateSub: Subscription;
     formatter = new Intl.DateTimeFormat("en-US", {
         month: "numeric",
         year: "numeric",
@@ -46,7 +44,7 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
                 toolBarService: OrderToolBarService,
                 userService: UserService) {
         this.user = userService.user;
-        this.$dateSub = toolBarService.state$.pipe(untilDestroyed(this)).subscribe(({type, payload}) => {
+        toolBarService.state$.pipe(untilDestroyed(this)).subscribe(({type, payload}) => {
             switch (type) {
                 case 'date':
                     this.getOrders(payload);
@@ -131,11 +129,13 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     downloadToCsv() {
-        const data = this.dataSource.data.map(item => `${item.user?.name},${item.mains},${item.sideOrders},${item.salad}`);
-        data.unshift('Isim,Ana Yemek,Ara Yemek,Salata');
-        const blob = new Blob([data.join('\n')], {type: 'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        window.open(url)
+        const data = this.dataSource.data.map(item => [item.user?.name, item.mains, item.sideOrders, item.salad]);
+        data.unshift(['Isim', 'Ana Yemek', 'Ara Yemek', 'Salata']);
+        const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
+        const wb: XLSX.WorkBook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+        const format = new Intl.DateTimeFormat('tr-TR')
+        XLSX.writeFile(wb, `yemek-listesi-${format.format(new Date())}.xlsx`);
     }
 
     print() {
@@ -146,6 +146,5 @@ export class OrdersComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.$dateSub.unsubscribe();
     }
 }
